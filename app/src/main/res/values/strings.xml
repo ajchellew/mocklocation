@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Mock Location</string>
+
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_collect">Collect</string>
+
+    <string name="mock_start">Playback</string>
+
+    <string name="collection_warning_one_second">Warning: this attempts to get GPS every 1 second therefore WILL effect battery
+        life.
+    </string>
+    <string name="collection_warning">Warning: this attempts to get GPS every %d seconds therefore WILL effect battery
+        life.
+    </string>
+
+    <string name="pref_playback_multiplier">pref_key_speed</string>
+    <string name="pref_playback_multiplier_title">Speed Multiplier</string>
+    <string name="pref_playback_multiplier_description">How many times to speed up playback by</string>
+
+    <string name="pref_collect_rate">pref_key_rate</string>
+    <string name="pref_collect_rate_title">Collection Rate</string>
+    <string name="pref_collect_rate_description">Interval in seconds between collections</string>
+
+    <string name="pref_lookup_markers">pref_key_lookup</string>
+    <string name="pref_lookup_markers_title">Reverse Geocode Markers</string>
+    <string name="pref_lookup_markers_description">Resolve location of markers using Google</string>
+
+    <string name="pref_nmea_file">pref_key_nmea</string>
+
+</resources>
+

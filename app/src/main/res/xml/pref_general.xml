@@ -1,0 +1,23 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:title="@string/pref_playback_multiplier_title"
+        android:defaultValue="1"
+        android:summary="@string/pref_playback_multiplier_description"
+        android:key="@string/pref_playback_multiplier"
+        android:numeric="integer" />
+
+    <EditTextPreference
+        android:title="@string/pref_collect_rate_title"
+        android:defaultValue="1"
+        android:summary="@string/pref_collect_rate_description"
+        android:key="@string/pref_collect_rate"
+        android:numeric="integer" />
+
+    <CheckBoxPreference
+        android:title="@string/pref_lookup_markers_title"
+        android:defaultValue="false"
+        android:summary="@string/pref_lookup_markers_description"
+        android:key="@string/pref_lookup_markers" />
+
+</PreferenceScreen>
