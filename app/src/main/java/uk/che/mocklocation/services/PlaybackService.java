@@ -30,6 +30,8 @@ public class PlaybackService extends Service {
     private static final int ENDED = 3;
     private static final int FAILED = 4;
 
+    private static final int RUNNING_STATIC = 10;
+
     private NotificationManager notificationManager;
 
     private MockLocationProvider mock;
@@ -39,6 +41,7 @@ public class PlaybackService extends Service {
     private static boolean isRunning = false;
 
     private int playbackMultiplier = 1;
+    private String staticLocation;
     /*final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     class IncomingHandler extends Handler { // Handler of incoming messages from clients.
@@ -93,10 +96,10 @@ public class PlaybackService extends Service {
                         state = RUNNING;
                     }
                 } else {
-                    String location = intent.getStringExtra("location");
+                    staticLocation = intent.getStringExtra("location");
                     mock = new MockLocationProvider(LocationManager.GPS_PROVIDER, this, 1);
-                    mock.start(location);
-                    state = RUNNING;
+                    mock.start(staticLocation);
+                    state = RUNNING_STATIC;
                 }
             }
             createNotification(state);
@@ -154,6 +157,7 @@ public class PlaybackService extends Service {
     private int getNotificationIcon(int state) {
         switch (state) {
             default:
+            case RUNNING_STATIC:
                 return R.drawable.ic_place_black_24dp;
             case RUNNING:
                 return R.drawable.ic_play_arrow_black_24dp;
@@ -175,6 +179,8 @@ public class PlaybackService extends Service {
                 return "End of playback file";
             case FAILED:
                 return "Error: Failed to Start";
+            case RUNNING_STATIC:
+                return "Mock location set: " + staticLocation;
         }
     }
 

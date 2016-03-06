@@ -25,7 +25,8 @@
     <string name="pref_lookup_markers_title">Reverse Geocode Markers</string>
     <string name="pref_lookup_markers_description">Resolve location of markers using Google</string>
 
-    <string name="pref_nmea_file">pref_key_nmea</string>
+    <string name="pref_selected_file">pref_key_file</string>
+    <string name="pref_selected_location">pref_key_location</string>
 
 </resources>
 

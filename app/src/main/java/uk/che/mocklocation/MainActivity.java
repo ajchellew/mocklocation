@@ -2,6 +2,7 @@ package uk.che.mocklocation;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -9,6 +10,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +18,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.File;
 
 import uk.che.common.utils.NumberUtils;
+import uk.che.common.utils.StringUtils;
 import uk.che.mocklocation.services.PlaybackService;
 import uk.che.mocklocation.utils.file.FileDialog;
 
@@ -117,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button selectFileButton = (Button) findViewById(R.id.button_select_nmea_file);
+        ImageButton selectFileButton = (ImageButton) findViewById(R.id.button_select_nmea_file);
         selectFileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button selectLocationButton = (Button) findViewById(R.id.button_select_location);
+        ImageButton selectLocationButton = (ImageButton) findViewById(R.id.button_select_location);
         selectLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,15 +145,59 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ImageButton inputLocationButton = (ImageButton) findViewById(R.id.button_input_location);
+        inputLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                float dpi = getResources().getDisplayMetrics().density;
+                int padding = (int) (19*dpi);
+
+                final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.AppTheme_Dialog);
+                builder.setTitle("Input Location");
+                final EditText inputEditText = new EditText(MainActivity.this);
+                inputEditText.setHint("Latitude,Longitude");
+                builder.setView(inputEditText, padding, 0, padding, 0);
+
+                builder.setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        String input = String.valueOf(inputEditText.getText());
+                                        if (!StringUtils.isNullOrEmpty(input) && input.contains(",")) {
+                                            String[] split = input.split(",", 2);
+                                            int latitude = Integer.parseInt(split[0]);
+                                            int longitude = Integer.parseInt(split[1]);
+                                            selectedLocation = NumberUtils.toFiveDecimalPlaces(latitude) + "," + NumberUtils.toFiveDecimalPlaces(longitude);
+                                            selectedLocationView.setText(selectedLocation);
+                                            savePreference(res.getString(R.string.pref_selected_location), selectedLocation);
+                                        }
+                                        imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        imm.hideSoftInputFromWindow(inputEditText.getWindowToken(), 0);
+                                        dialog.cancel();
+                                    }
+                                });
+
+                builder.create().show();
+
+                inputEditText.requestFocus();
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        });
+
         fileDialog = new FileDialog(this, FilesPath);
         fileDialog.setFileEndsWith(".txt");
         fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
             public void fileSelected(File file) {
                 Log.d(TAG, "selected file " + file.toString());
                 if (file.exists()) {
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(res.getString(R.string.pref_nmea_file), file.toString());
-                    editor.apply();
+                    savePreference(res.getString(R.string.pref_selected_file), file.toString());
                     selectedFile = file.toString();
                     displaySelectedFile();
                 }
@@ -156,9 +205,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void savePreference(String pref, String value) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(pref, value);
+        editor.apply();
+    }
+
     private void showOptions() {
         Toast.makeText(MainActivity.this, "Error: Mock Location must be enabled in Developer Options!", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+        //Intent intent = new Intent(Settings.ACTION_SETTINGS);
+        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
@@ -167,8 +223,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Resources res = getResources();
-        selectedFile = prefs.getString(res.getString(R.string.pref_nmea_file), null);
+        selectedFile = prefs.getString(res.getString(R.string.pref_selected_file), null);
         displaySelectedFile();
+        selectedLocation = prefs.getString(res.getString(R.string.pref_selected_location), null);
+        selectedLocationView.setText(selectedLocation);
 
         updateButtonIcon();
     }
@@ -226,6 +284,8 @@ public class MainActivity extends AppCompatActivity {
                 LatLng latLon = place.getLatLng();
                 selectedLocation = NumberUtils.toFiveDecimalPlaces(latLon.latitude) + "," + NumberUtils.toFiveDecimalPlaces(latLon.longitude);
                 selectedLocationView.setText(selectedLocation);
+                Resources res = getResources();
+                savePreference(res.getString(R.string.pref_selected_location), selectedLocation);
             }
         }
     }
